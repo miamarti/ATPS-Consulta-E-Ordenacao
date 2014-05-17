@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="cache-control" content="no-store" />
+<meta http-equiv="pragma" content="no-store" />
+<meta http-equiv="content-language" content="pt-br, en-US" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="content-script-type" content="text/javascript" />
+<meta http-equiv="content-style-type" content="text/css" />
+<meta http-equiv="imagetoolbar" content="no" />
+<meta http-equiv="expires" content="0" />
+<link href="assets/css/page.css" rel="stylesheet" media="screen">
+<script>
+    var numSequencial = 1;
+    var filaComum = new Array();
+    var filaPreferencial = new Array();
+    var filaUnica = new Array();
+    var log = "";
+    
+    var ClienteBean = function(){
+        this.nome;
+        this.idade;
+    };
+    ClienteBean.prototype.setNome = function(value){
+        this.nome = value;
+    };
+    ClienteBean.prototype.getNome = function(){
+        return this.nome;
+    };
+    ClienteBean.prototype.setIdade = function(value){
+        this.idade = value;
+    };
+    ClienteBean.prototype.getIdade = function(){
+        return this.idade;
+    };
+    ClienteBean.prototype.isPreferencial = function(){
+        return (this.idade >= 50);
+    };
+    ClienteBean.prototype.toString = function(){
+        return '<a class="itenCliente btn btn-mini ' + (this.isPreferencial()?'btn-danger':'btn-inverse') + '" href="#"><i class="icon-user icon-white"></i> ' + this.nome + ' idade ' + this.idade + '</a>';
+    };
+    
+    var addFila = function(cliente){
+        if(cliente.isPreferencial()){
+            filaPreferencial.push(cliente);
+        } else {
+            filaComum.push(cliente);
+        }
+    };
+
+    var newCliente = function(){
+        var cliente = new ClienteBean();
+        var idade = Math.floor((Math.random() * 100) + 1);
+        cliente.setNome('Cliente' + numSequencial);
+        cliente.setIdade(idade);
+        addFila(cliente);
+        numSequencial++;
+        return cliente;
+    };
+    
+    var showFilas = function(){
+        console.log('Fila comum:', filaComum);
+        console.log('Fila preferencial:', filaPreferencial);
+        return "Filas de Clientes";
+    };
+    
+    var ordenarFila = function(fila){
+        var clienteTemp = {};
+        log = "";
+        for(var i=0; i<fila.length; i++){
+            log += ">> " + JSON.stringify(fila[i]) + "\n";
+            for(var j=(i+1); j<fila.length; j++){
+                log += " ---- " + JSON.stringify(fila[i]) + " ~ " + JSON.stringify(fila[j]) + "\n";
+                if(fila[i].idade>fila[j].idade){
+                    clienteTemp = fila[i];
+                    fila[i] = fila[j];
+                    fila[j] = clienteTemp;
+                    log += "      " + JSON.stringify(fila[i]) + " <<>> " +  JSON.stringify(fila[j]) + "\n";
+                }
+                log += "\n";
+            }
+        }
+        return fila;
+    };
+    
+    var setFilaUnica = function(){
+        for(var i=filaPreferencial.length; i>0; i--){
+            filaUnica.push(filaPreferencial[(i-1)]);
+            filaPreferencial.splice((i-1),1);
+        }
+        for(var i=filaComum.length; i>0; i--){
+            filaUnica.push(filaComum[(i-1)]);
+            filaComum.splice((i-1),1);
+        }
+    };
+    
+    var printFilaComun = function(){
+        document.getElementById('filaClienteNormal').innerHTML = '';
+        filaComum.forEach(function(cliente){
+            document.getElementById('filaClienteNormal').innerHTML += cliente.toString();
+        });
+    };
+    
+    var printFilaPreferencial = function(){
+        document.getElementById('filaClientePreferenciais').innerHTML = '';
+        filaPreferencial.forEach(function(cliente){
+            document.getElementById('filaClientePreferenciais').innerHTML += cliente.toString();
+        });
+    };
+    
+    var printFilaUnica = function(){
+        document.getElementById('filaUnica').innerHTML = '';
+        filaUnica.forEach(function(cliente){
+            document.getElementById('filaUnica').innerHTML += cliente.toString();
+        });
+    };
+    
+    // <<< Chamada dos Testes >>>
+    
+    var caixaStart = function(){
+        var velocidadeCx1 = (Math.floor((Math.random() * 4) + 1) * 1000);
+        var velocidadeCx2 = (Math.floor((Math.random() * 4) + 1) * 1000);
+        var velocidadeCx3 = (Math.floor((Math.random() * 4) + 1) * 1000);
+        
+        var caixa1 = window.setInterval(function(){
+            printFilaUnica();
+            try{
+                document.getElementById('cx1').innerHTML = filaUnica[0].toString();
+                filaUnica.splice(0, 1);
+            } catch(e){
+                document.getElementById('cx1').innerHTML = '';
+            }
+            document.getElementById('cx1').dataset.title = 'Caixa 1 - Velocidade: ' + (velocidadeCx1/1000) + ' por atendimento';
+        }, velocidadeCx1);
+        
+        var caixa2 = window.setInterval(function(){
+            printFilaUnica();
+            try{
+                document.getElementById('cx2').innerHTML = filaUnica[0].toString();
+                filaUnica.splice(0, 1);
+            } catch(e){
+                document.getElementById('cx2').innerHTML = '';
+            }
+            document.getElementById('cx2').dataset.title = 'Caixa 2 - Velocidade: ' + (velocidadeCx2/1000) + ' por atendimento';
+        }, velocidadeCx2);
+        
+        var caixa3 = window.setInterval(function(){
+            printFilaUnica();
+            try{
+                document.getElementById('cx3').innerHTML = filaUnica[0].toString();
+                filaUnica.splice(0, 1);
+            } catch(e){
+                document.getElementById('cx3').innerHTML = '';
+            }
+            document.getElementById('cx3').dataset.title = 'Caixa 3 - Velocidade: ' + (velocidadeCx3/1000) + ' por atendimento';
+        }, velocidadeCx3);
+    };
+    
+    var simularManual = function(){
+        filaComum = new Array();
+        filaPreferencial = new Array();
+        
+        document.getElementById('chegadaClientes').innerHTML = '';
+        for(var i=0; i<20; i++){
+            var cliente = newCliente();
+            document.getElementById('chegadaClientes').innerHTML += cliente.toString();
+        }
+    };
+    
+    var verOrdenacao = function(reset){
+        if(reset != undefined){
+            filaUnica = new Array();
+        }
+        ordenarFila(filaComum);
+        printFilaComun();
+        
+        ordenarFila(filaPreferencial);
+        printFilaPreferencial();
+        
+        setFilaUnica();        
+        printFilaUnica();
+    };
+    
+    var simuladorReal = function(){
+        var velocidade = (Math.floor((Math.random() * 5) + 1) * 1000);
+        document.getElementById('chegadaClientes').dataset.title = 'Chegada de Clientes - takt time: ' + (velocidade/1000) + ' segundos';
+        window.setInterval(function(){
+            document.getElementById('chegadaClientes').innerHTML = '';
+            var cliente;
+            var qtd = Math.floor((Math.random() * 10) + 1);
+            for(var i=0; i<qtd; i++){
+                cliente = newCliente();
+                document.getElementById('chegadaClientes').innerHTML += cliente.toString();
+            }
+            verOrdenacao();
+        }, 2000);
+                
+        caixaStart();
+    }
+</script>
+</head>
+<body>
+    <div class="page">
+        <button class="btn btn-small btn-success" type="button" onclick="simuladorReal()">Simular Chegada Automaticamente</button>
+        <button class="btn btn-small btn-primary" type="button" onclick="simularManual()">Simular Chegada Manualmente</button>
+        <button class="btn btn-small btn-primary" type="button" onclick="verOrdenacao(true)">Ver Ordenação</button>
+    </div>
+    
+    <div class="page">
+        <div class="fieldset" data-title="Chegada de Clientes" id="chegadaClientes"></div>
+    </div>
+    
+    <hr/>
+    
+    <div class="page">
+        <div class="fieldset" data-title="Fila unica" id="filaUnica"></div>
+    </div>
+            
+    <div class="page">
+        <div class="fieldset" data-title="Caixas">
+            <div class="row-fluid">
+                <div class="span4">
+                    <div class="fieldset" id="cx1" data-title="Caixa 1"></div>
+                </div>
+                <div class="span4">
+                    <div class="fieldset" id="cx2" data-title="Caixa 2"></div>
+                </div>
+                <div class="span4">
+                    <div class="fieldset" id="cx3" data-title="Caixa 3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <hr/>
+    
+    <div class="page">
+        <div class="fieldset" data-title="Visão detalhada">
+            <div class="fieldset" data-title="Fila de Clientes Preferenciais" id="filaClientePreferenciais"></div>
+            <div class="fieldset" data-title="Fila de Clientes Normais" id="filaClienteNormal"></div>
+        </div>
+    </div>
+</body>
+</html>
